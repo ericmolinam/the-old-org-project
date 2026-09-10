@@ -2,16 +2,16 @@ resource "aws_eip" "this" {
   domain = "vpc"
 
   tags = {
-    Name = "dev-ip"
+    Name = "${local.env}-ip"
   }
 }
 
 resource "aws_nat_gateway" "this" {
   allocation_id = aws_eip.this.id
-  subnet_id     = aws_subnet.public_1.id
+  subnet_id     = aws_subnet.public_1[0].id
 
   tags = {
-    Name = "dev-nat"
+    Name = "${local.env}-nat"
   }
 
   depends_on = [aws_internet_gateway.this]
@@ -23,7 +23,7 @@ resource "aws_subnet" "private_1" {
   availability_zone = "eu-west-2a"
 
   tags = {
-    Name = "dev-private-eu-west-2a"
+    Name = "${local.env}-private-eu-west-2a"
   }
 }
 
@@ -33,7 +33,7 @@ resource "aws_subnet" "private_2" {
   availability_zone = "eu-west-2b"
 
   tags = {
-    Name = "dev-private-eu-west-2b"
+    Name = "${local.env}-private-eu-west-2b"
   }
 }
 
@@ -41,12 +41,12 @@ resource "aws_route_table" "private" {
   vpc_id = aws_vpc.this.id
 
   route {
-    cidr_block = "0.0.0.0/0"
+    cidr_block     = "0.0.0.0/0"
     nat_gateway_id = aws_nat_gateway.this.id
   }
 
   tags = {
-    Name = "dev-private"
+    Name = "${local.env}-private"
   }
 }
 

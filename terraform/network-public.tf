@@ -2,27 +2,31 @@ resource "aws_internet_gateway" "this" {
   vpc_id = aws_vpc.this.id
 
   tags = {
-    Name = "dev-igw"
+    Name = "${local.env}-igw"
   }
 }
 
 resource "aws_subnet" "public_1" {
+  count = length(local.public_subnets)
+
   vpc_id            = aws_vpc.this.id
-  cidr_block        = "10.0.1.0/24"
-  availability_zone = "eu-west-2a"
+  cidr_block        = local.public_subnets[count.index]
+  availability_zone = local.azs[count.index]
 
   tags = {
-    Name = "dev-public-eu-west-2a"
+    Name = "${local.env}-public-${local.azs[count.index]}"
   }
 }
 
 resource "aws_subnet" "public_2" {
+  count = length(local.public_subnets)
+
   vpc_id            = aws_vpc.this.id
-  cidr_block        = "10.0.2.0/24"
-  availability_zone = "eu-west-2b"
+  cidr_block        = local.public_subnets[count.index]
+  availability_zone = local.azs[count.index]
 
   tags = {
-    Name = "dev-public-eu-west-2b"
+    Name = "${local.env}-public-${local.azs[count.index]}"
   }
 }
 
@@ -35,16 +39,20 @@ resource "aws_route_table" "public" {
   }
 
   tags = {
-    Name = "dev-public"
+    Name = "${local.env}-public"
   }
 }
 
 resource "aws_route_table_association" "public_1" {
-  subnet_id      = aws_subnet.public_1.id
+  count = length(local.public_subnets)
+  
+  subnet_id      = aws_subnet.public_1[count.index].id
   route_table_id = aws_route_table.public.id
 }
 
 resource "aws_route_table_association" "public_2" {
-  subnet_id      = aws_subnet.public_2.id
+  count = length(local.public_subnets)
+  
+  subnet_id      = aws_subnet.public_2[count.index].id
   route_table_id = aws_route_table.public.id
 }
