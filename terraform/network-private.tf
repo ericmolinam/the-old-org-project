@@ -39,8 +39,9 @@ resource "aws_route_table" "private" {
   vpc_id = aws_vpc.this.id
 
   route {
-    cidr_block     = "0.0.0.0/0"
-    nat_gateway_id = one([
+    cidr_block = "0.0.0.0/0"
+    # For this private subnet, find the public subnet in the same availability zone, then use the NAT gateway created in that public subnet.
+    nat_gateway_id = one([ # Example result: "nat-0123456789"
       for public_key, public_subnet in local.public_subnets :
       aws_nat_gateway.this[public_key].id
       if public_subnet.availability_zone == each.value.availability_zone
