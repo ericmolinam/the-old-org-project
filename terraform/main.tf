@@ -1,10 +1,10 @@
 resource "aws_vpc" "this" {
-  cidr_block = "10.0.0.0/16"
+  cidr_block = local.vpc_cidr
 
   enable_dns_support   = true
   enable_dns_hostnames = true
 
   tags = {
-    Name = "dev-vpc"
+    Name = "${local.env}-vpc"
   }
 }
