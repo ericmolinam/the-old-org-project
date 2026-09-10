@@ -8,7 +8,7 @@ resource "aws_eip" "this" {
 
 resource "aws_nat_gateway" "this" {
   allocation_id = aws_eip.this.id
-  subnet_id     = aws_subnet.public_1[0].id
+  subnet_id     = aws_subnet.public[0].id
 
   tags = {
     Name = "${local.env}-nat"
@@ -17,23 +17,15 @@ resource "aws_nat_gateway" "this" {
   depends_on = [aws_internet_gateway.this]
 }
 
-resource "aws_subnet" "private_1" {
+resource "aws_subnet" "private" {
+  for_each = local.private_subnets
+
   vpc_id            = aws_vpc.this.id
-  cidr_block        = "10.0.101.0/24"
-  availability_zone = "eu-west-2a"
+  cidr_block        = each.value.cidr_block
+  availability_zone = each.value.availability_zone
 
   tags = {
-    Name = "${local.env}-private-eu-west-2a"
-  }
-}
-
-resource "aws_subnet" "private_2" {
-  vpc_id            = aws_vpc.this.id
-  cidr_block        = "10.0.102.0/24"
-  availability_zone = "eu-west-2b"
-
-  tags = {
-    Name = "${local.env}-private-eu-west-2b"
+    Name = "${local.env}-private-${each.value.availability_zone}"
   }
 }
 
@@ -50,12 +42,9 @@ resource "aws_route_table" "private" {
   }
 }
 
-resource "aws_route_table_association" "private_1" {
-  subnet_id      = aws_subnet.private_1.id
-  route_table_id = aws_route_table.private.id
-}
+resource "aws_route_table_association" "private" {
+  for_each = local.private_subnets
 
-resource "aws_route_table_association" "private_2" {
-  subnet_id      = aws_subnet.private_2.id
+  subnet_id      = aws_subnet.private[each.key].id
   route_table_id = aws_route_table.private.id
 }
