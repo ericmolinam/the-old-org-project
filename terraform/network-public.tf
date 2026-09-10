@@ -7,14 +7,14 @@ resource "aws_internet_gateway" "this" {
 }
 
 resource "aws_subnet" "public" {
-  count = length(local.public_subnets)
+  for_each = local.public_subnets
 
   vpc_id            = aws_vpc.this.id
-  cidr_block        = local.public_subnets[count.index]
-  availability_zone = local.azs[count.index]
+  cidr_block        = each.value.cidr_block
+  availability_zone = each.value.availability_zone
 
   tags = {
-    Name = "${local.env}-public-${local.azs[count.index]}"
+    Name = "${local.env}-public-${each.value.availability_zone}"
   }
 }
 
@@ -32,8 +32,8 @@ resource "aws_route_table" "public" {
 }
 
 resource "aws_route_table_association" "public" {
-  count = length(local.public_subnets)
+  for_each = local.public_subnets
 
-  subnet_id      = aws_subnet.public[count.index].id
+  subnet_id      = aws_subnet.public[each.key].id
   route_table_id = aws_route_table.public.id
 }
