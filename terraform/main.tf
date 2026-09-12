@@ -29,3 +29,7 @@ resource "aws_instance" "this" {
     Name = "${local.env}-ec2-${each.key}"
   }
 }
+
+output "ec2_ip" {
+  value = { for k, v in aws_instance.this : k => v.public_ip }
+}
