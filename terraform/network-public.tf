@@ -39,22 +39,44 @@ resource "aws_route_table_association" "public" {
 }
 
 resource "aws_security_group" "public" {
-  name        = "${local.env}-public"
-  vpc_id      = aws_vpc.this.id
+  name   = "${local.env}-public"
+  vpc_id = aws_vpc.this.id
 
-dynamic "ingress" {
-  for_each = local.ingress_rules
-
-  content {
-    description = ingress.value.description
-    from_port   = ingress.value.from_port
-    to_port     = ingress.value.to_port
-    protocol    = ingress.value.protocol
-    cidr_blocks = ingress.value.cidr_blocks
-  }
-}
   tags = {
     Name = "${local.env}-public"
   }
+}
+
+resource "aws_vpc_security_group_ingress_rule" "ssh" {
+  security_group_id = aws_security_group.public.id
+  cidr_ipv4         = "0.0.0.0/0"
+  description       = "Allow SSH"
+  from_port         = 22
+  ip_protocol       = "tcp"
+  to_port           = 22
+}
+
+resource "aws_vpc_security_group_ingress_rule" "http" {
+  security_group_id = aws_security_group.public.id
+  cidr_ipv4         = "0.0.0.0/0"
+  description       = "Allow HTTP"
+  from_port         = 80
+  ip_protocol       = "tcp"
+  to_port           = 80
+}
+
+resource "aws_vpc_security_group_ingress_rule" "https" {
+  security_group_id = aws_security_group.public.id
+  cidr_ipv4         = "0.0.0.0/0"
+  description       = "Allow HTTPS"
+  from_port         = 443
+  ip_protocol       = "tcp"
+  to_port           = 443
+}
+
+resource "aws_vpc_security_group_egress_rule" "public" {
+  security_group_id = aws_security_group.public.id
+  cidr_ipv4         = "0.0.0.0/0"
+  ip_protocol       = "-1"
 }
 
