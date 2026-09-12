@@ -8,6 +8,7 @@ resource "aws_vpc" "this" {
     Name = "${local.env}-vpc"
   }
 }
+
 resource "aws_instance" "this" {
   for_each = local.public_subnets
 
@@ -17,7 +18,14 @@ resource "aws_instance" "this" {
   vpc_security_group_ids = [aws_security_group.public.id]
   subnet_id = aws_subnet.public[each.key].id
 
+  user_data = <<-EOF
+              #!/bin/bash
+              sudo yum update -y && sudo yum install -y httpd
+              sudo systemctl start httpd
+              sudo systemctl enable httpd
+              EOF
+
   tags = {
-    Name = "${local.env}-instance-${each.key}"
+    Name = "${local.env}-ec2-${each.key}"
   }
 }
