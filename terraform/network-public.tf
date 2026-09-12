@@ -9,9 +9,9 @@ resource "aws_internet_gateway" "this" {
 resource "aws_subnet" "public" {
   for_each = local.public_subnets
 
-  vpc_id            = aws_vpc.this.id
-  cidr_block        = each.value.cidr_block
-  availability_zone = each.value.availability_zone
+  vpc_id                  = aws_vpc.this.id
+  cidr_block              = each.value.cidr_block
+  availability_zone       = each.value.availability_zone
   map_public_ip_on_launch = true
 
   tags = {

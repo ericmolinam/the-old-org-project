@@ -12,11 +12,11 @@ resource "aws_vpc" "this" {
 resource "aws_instance" "this" {
   for_each = local.public_subnets
 
-  ami           = "ami-0f9629c639a701fa7"
+  ami           = data.aws_ami.amazon_linux.id
   instance_type = "t3.micro"
 
   vpc_security_group_ids = [aws_security_group.public.id]
-  subnet_id = aws_subnet.public[each.key].id
+  subnet_id              = aws_subnet.public[each.key].id
 
   user_data = <<-EOF
               #!/bin/bash
